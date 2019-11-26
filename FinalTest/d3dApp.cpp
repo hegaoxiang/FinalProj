@@ -2,6 +2,8 @@
 #include "d3dUtil.h"
 #include "DXTrace.h"
 #include <sstream>
+#include "d3dUtil.h"
+#include "DXTrace.h"
 
 namespace
 {
@@ -11,9 +13,13 @@ namespace
 	D3DApp* g_pd3dApp = nullptr;
 }
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return true;
 	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
 	// before CreateWindow returns, and thus before m_hMainWnd is valid.
 	return g_pd3dApp->MsgProc(hwnd, msg, wParam, lParam);
@@ -51,6 +57,10 @@ D3DApp::~D3DApp()
 	// 恢复所有默认设定
 	if (m_pd3dImmediateContext)
 		m_pd3dImmediateContext->ClearState();
+	// Cleanup
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 HINSTANCE D3DApp::AppInst()const
@@ -109,6 +119,8 @@ bool D3DApp::Init()
 	if (!InitDirect3D())
 		return false;
 
+	if (!InitImgui())
+		return false;
 	return true;
 }
 
@@ -357,6 +369,8 @@ bool D3DApp::InitMainWindow()
 	ShowWindow(m_hMainWnd, SW_SHOW);
 	UpdateWindow(m_hMainWnd);
 
+	
+
 	return true;
 }
 
@@ -520,6 +534,20 @@ bool D3DApp::InitDirect3D()
 	// 每当窗口被重新调整大小的时候，都需要调用这个OnResize函数。现在调用
 	// 以避免代码重复
 	OnResize();
+
+	return true;
+}
+
+bool D3DApp::InitImgui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplWin32_Init(m_hMainWnd);
+	ImGui_ImplDX11_Init(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get());
 
 	return true;
 }
