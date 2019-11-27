@@ -12,7 +12,8 @@ HRESULT CreateShaderFromFile(const WCHAR* csoFileNameInOut, const WCHAR* hlslFil
 	LPCSTR entryPoint, LPCSTR shaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;
-
+	// 若指定了输出文件名，则将着色器二进制信息输出
+	
 	// 寻找是否有已经编译好的顶点着色器
 	if (csoFileNameInOut && D3DReadFileToBlob(csoFileNameInOut, ppBlobOut) == S_OK)
 	{
@@ -41,12 +42,12 @@ HRESULT CreateShaderFromFile(const WCHAR* csoFileNameInOut, const WCHAR* hlslFil
 			SAFE_RELEASE(errorBlob);
 			return hr;
 		}
-
 		// 若指定了输出文件名，则将着色器二进制信息输出
 		if (csoFileNameInOut)
 		{
 			return D3DWriteBlobToFile(*ppBlobOut, csoFileNameInOut, FALSE);
 		}
+		
 	}
 
 	return hr;

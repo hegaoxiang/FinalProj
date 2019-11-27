@@ -60,6 +60,18 @@
     <ClInclude Include="DXTrace.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalTest.cpp">
@@ -98,6 +110,18 @@
     <ClCompile Include="DXTrace.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Triangle.hlsli">
@@ -105,10 +129,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="HLSL\Triangle_PS.hlsl">
+    <FxCompile Include="HLSL\Triangle_PS01.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\Triangle_VS.hlsl">
+    <FxCompile Include="HLSL\Triangle_VS02.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
