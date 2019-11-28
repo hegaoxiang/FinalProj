@@ -16,8 +16,8 @@ public:
 
 	bool InitShader();
 	bool InitResource();
-	template<class VertexType>
-	bool ResetMesh(const Geometry::MeshData<VertexType>& mesh);
+	
+	
 
 private:
 	ComPtr<ID3D11VertexShader> m_pVertexShader;

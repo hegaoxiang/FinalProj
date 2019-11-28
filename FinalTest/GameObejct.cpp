@@ -1,33 +1,6 @@
 #include "GameObejct.h"
-#include "DXTrace.h"
-template<class VertexType, class IndexType>
-void GameObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData)
-{
-	// ÊÍ·Å¾É×ÊÔ´
-	m_pVertexBuffer.Reset();
-	m_pIndexBuffer.Reset();
-	// vertexbuffer
-	D3D11_BUFFER_DESC bd;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.ByteWidth = sizeof(VertexType) * meshData.vertexVec.size();
-	bd.CPUAccessFlags = 0;
-	bd.Usage = D3D11_USAGE_IMMUTABLE;
 
-	D3D11_SUBRESOURCE_DATA initData;
-	initData.pSysMem = meshData.vertexVec.data();
 
-	HR(device->CreateBuffer(&bd, &initData, m_pVertexBuffer.GetAddressOf()));
-
-	//indexbuffer
-	m_IndexCount = meshData.indexVec.size();
-
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.ByteWidth = sizeof(IndexType) * meshData.indexVec.size();
-
-	initData.pSysMem = meshData.indexVec.data();
-
-	HR(device->CreateBuffer(&bd, &initData, m_pIndexBuffer.GetAddressOf()));
-}
 
 GameObject::GameObject()
 	: m_IndexCount(), m_VertexStride()

@@ -74,24 +74,12 @@ void GameApp::UpdateScene(float dt)
 	ImGui::End();
 	
 
-	CBChangesEveryDrawing cbEveryDraw;
+	
 	CBChangesEveryFrame cbEveryFrame;
-	cbEveryDraw.world = XMMatrixMultiplyTranspose(XMMatrixIdentity(), XMMatrixTranslation(2.f, 2.f, 1.f));   // 单位矩阵的转置是它本身
+
 	cbEveryFrame.view = XMMatrixTranspose(m_pCamera->GetViewXM());
 	
-
-	static float phi = 0.0f, theta = 0.0f;
-	phi += 0.0001f, theta += 0.00015f;
-	cbEveryDraw.world *= (XMMatrixRotationX(phi) * XMMatrixRotationY(theta));
-	
-	
-	
-	m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_pTemp[i].GetAddressOf());
-
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[0].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesEveryDrawing), &cbEveryDraw, sizeof(CBChangesEveryDrawing));
-	m_pd3dImmediateContext->Unmap(m_pConstantBuffers[0].Get(), 0);
 	
 	HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[1].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 	memcpy_s(mappedData.pData, sizeof(CBChangesEveryFrame), &cbEveryFrame, sizeof(CBChangesEveryFrame));
@@ -109,15 +97,18 @@ void GameApp::DrawScene()
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_bg);
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
-	/*
-	for (int i = 0; i < 6; i++)
+	m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_WoodCrate.m_pTexture.GetAddressOf());
+	m_WoodCrate.Draw(m_pd3dImmediateContext.Get());
+	
+	m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_Floor.m_pTexture.GetAddressOf());
+	m_Floor.Draw(m_pd3dImmediateContext.Get());
+
+	for (auto& wall : m_Walls)
 	{
-		m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_pTemp[i].GetAddressOf());
-		m_pd3dImmediateContext->DrawIndexed(m_IndexCount / 6, i * m_IndexCount / 6, 0);
-	}*/
-	
-	
+		m_pd3dImmediateContext->PSSetShaderResources(0, 1, wall.m_pTexture.GetAddressOf());
+		wall.Draw(m_pd3dImmediateContext.Get());
+	}
+
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	HR(m_pSwapChain->Present(0, 0));
@@ -160,13 +151,13 @@ bool GameApp::InitResource()
 	ComPtr<ID3D11ShaderResourceView> texture;
 
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
-	m_WoodCrate.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox());
+	m_WoodCrate.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox<VertexPosTex>());
 	m_WoodCrate.SetTexture(texture.Get());
 
 	// 初始化地板
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Green.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_Floor.SetBuffer(m_pd3dDevice.Get(),
-		Geometry::CreatePlane(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(20.0f, 20.0f), XMFLOAT2(5.0f, 5.0f)));
+		Geometry::CreatePlane<VertexPosTex>(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(20.0f, 20.0f), XMFLOAT2(5.0f, 5.0f)));
 	m_Floor.SetTexture(texture.Get());
 
 	// 初始化墙体
@@ -176,7 +167,7 @@ bool GameApp::InitResource()
 	for (int i = 0; i < 4; ++i)
 	{
 		m_Walls[i].SetBuffer(m_pd3dDevice.Get(),
-			Geometry::CreatePlane(XMFLOAT3(), XMFLOAT2(20.0f, 8.0f), XMFLOAT2(5.0f, 1.5f)));
+			Geometry::CreatePlane<VertexPosTex>(XMFLOAT3(), XMFLOAT2(20.0f, 8.0f), XMFLOAT2(5.0f, 1.5f)));
 		XMMATRIX world = XMMatrixRotationX(-XM_PIDIV2) * XMMatrixRotationY(XM_PIDIV2 * i)
 			* XMMatrixTranslation(i % 2 ? -10.0f * (i - 2) : 0.0f, 3.0f, i % 2 == 0 ? -10.0f * (i - 1) : 0.0f);
 		m_Walls[i].SetWorldMatrix(world);
@@ -189,8 +180,6 @@ bool GameApp::InitResource()
 	cbd.Usage = D3D11_USAGE_DYNAMIC;
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	// 新建用于VS和PS的常量缓冲区
 	cbd.ByteWidth = sizeof(CBChangesEveryDrawing);
 	HR(m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstantBuffers[0].GetAddressOf()));
 	cbd.ByteWidth = sizeof(CBChangesEveryFrame);
@@ -213,17 +202,7 @@ bool GameApp::InitResource()
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	HR(m_pd3dDevice->CreateSamplerState(&sampDesc, m_pSamplerState.GetAddressOf()));
-
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, m_pWoodCrate.GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Blue.dds", nullptr, m_pTemp[0].GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Green.dds", nullptr, m_pTemp[1].GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Orange.dds", nullptr, m_pTemp[2].GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Red.dds", nullptr, m_pTemp[3].GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\White.dds", nullptr, m_pTemp[4].GetAddressOf()));
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\yellow.dds", nullptr, m_pTemp[5].GetAddressOf()));
 	
-	
-	m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_pWoodCrate.GetAddressOf());
 	// 像素着色阶段设置好采样器
 	m_pd3dImmediateContext->PSSetSamplers(0, 1, m_pSamplerState.GetAddressOf());
 
@@ -238,53 +217,6 @@ bool GameApp::InitResource()
 
 	m_pd3dImmediateContext->PSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
 	
-
-	return true;
-}
-template<class VertexType>
-bool GameApp::ResetMesh(const Geometry::MeshData<VertexType>& meshData)
-{
-
-	// 释放旧资源
-	m_pVertexBuffer.Reset();
-	m_pIndexBuffer.Reset();
-
-	// 设置顶点缓冲区描述
-	D3D11_BUFFER_DESC vbd;
-	ZeroMemory(&vbd, sizeof(vbd));
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = (UINT)meshData.vertexVec.size() * sizeof(VertexType);
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-
-	// 新建顶点缓冲区
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = meshData.vertexVec.data();
-	HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));
-
-	// 输入装配阶段的顶点缓冲区设置
-	UINT stride = sizeof(VertexType);	// 跨越字节数
-	UINT offset = 0;					// 起始偏移量
-
-	m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-	// 设置索引缓冲区描述
-	m_IndexCount = (UINT)meshData.indexVec.size();
-	D3D11_BUFFER_DESC ibd;
-	ZeroMemory(&ibd, sizeof(ibd));
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = m_IndexCount * sizeof(WORD);
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	// 新建索引缓冲区
-	InitData.pSysMem = meshData.indexVec.data();
-	HR(m_pd3dDevice->CreateBuffer(&ibd, &InitData, m_pIndexBuffer.GetAddressOf()));
-	// 输入装配阶段的索引缓冲区设置
-	m_pd3dImmediateContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-	// 设置调试对象名
-	D3D11SetDebugObjectName(m_pVertexBuffer.Get(), "VertexBuffer");
-	D3D11SetDebugObjectName(m_pIndexBuffer.Get(), "IndexBuffer");
 
 	return true;
 }
