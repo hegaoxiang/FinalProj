@@ -9,6 +9,9 @@
 #include "GameTimer.h"
 #include "DDSTextureLoader.h"
 #include "WICTextureLoader.h"
+#include<memory>
+#include"Mouse.h"
+#include"Keyboard.h"
 // 添加所有要引用的库
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -71,6 +74,9 @@ protected:
 	ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;   // 渲染目标视图
 	ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;   // 深度模板视图
 	D3D11_VIEWPORT m_ScreenViewport;                      // 视口
+
+	std::unique_ptr<DirectX::Mouse> m_pMouse;			
+	std::unique_ptr<DirectX::Keyboard> m_pKeyboard;
 
 	// 派生类应该在构造函数设置好这些自定义的初始参数
 	std::wstring m_MainWndCaption;                       // 主窗口标题

@@ -133,3 +133,19 @@ struct VertexPosNormalTangentTex
 	DirectX::XMFLOAT2 tex;
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
 };
+struct CBChangesEveryDrawing
+{
+	DirectX::XMMATRIX world;
+	//DirectX::XMMATRIX worldInvTranspose;
+};
+
+struct CBChangesEveryFrame
+{
+	DirectX::XMMATRIX view;
+	//DirectX::XMFLOAT4 eyePos;
+};
+
+struct CBChangesOnResize
+{
+	DirectX::XMMATRIX proj;
+};
