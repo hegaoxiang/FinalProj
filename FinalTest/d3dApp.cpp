@@ -189,15 +189,16 @@ void D3DApp::OnResize()
 
 	// 将渲染目标视图和深度/模板缓冲区结合到管线
 	m_pd3dImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
-
+	
+		
 	// 设置视口变换
 	m_ScreenViewport.TopLeftX = 0;
 	m_ScreenViewport.TopLeftY = 0;
-	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth);
+	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth) / 2;
 	m_ScreenViewport.Height = static_cast<float>(m_ClientHeight);
 	m_ScreenViewport.MinDepth = 0.0f;
 	m_ScreenViewport.MaxDepth = 1.0f;
-
+	
 	m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
 
 	// 设置调试对象名

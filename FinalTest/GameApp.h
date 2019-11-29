@@ -17,8 +17,6 @@ public:
 	bool InitShader();
 	bool InitResource();
 	
-	
-
 private:
 	ComPtr<ID3D11VertexShader> m_pVertexShader;
 	ComPtr<ID3D11PixelShader> m_pPixelShader;
@@ -31,11 +29,14 @@ private:
 	ComPtr<ID3D11ShaderResourceView> m_pWoodCrate;
 	ComPtr<ID3D11ShaderResourceView> m_pTemp[6];
 
-	std::unique_ptr<FirstPersonCamera> m_pCamera;
+	CameraMode m_CameraMode = CameraMode::FirstPerson;
+	std::shared_ptr<Camera> m_pCamera;
 	
 	GameObject m_WoodCrate;
 	GameObject m_Floor;
 	std::vector<GameObject> m_Walls;
+
+	CBChangesOnResize m_CBOnResize;
 	float m_bg[4] = { 0.0f, 0.0f, 1.0f, 1.0f };	// RGBA = (0,0,255,255)
 };
 

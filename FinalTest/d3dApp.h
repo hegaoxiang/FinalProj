@@ -77,6 +77,8 @@ protected:
 
 	std::unique_ptr<DirectX::Mouse> m_pMouse;			
 	std::unique_ptr<DirectX::Keyboard> m_pKeyboard;
+	DirectX::Mouse::ButtonStateTracker m_MouseTracker;
+	DirectX::Keyboard::KeyboardStateTracker m_KeyboardTracker;
 
 	// 派生类应该在构造函数设置好这些自定义的初始参数
 	std::wstring m_MainWndCaption;                       // 主窗口标题
