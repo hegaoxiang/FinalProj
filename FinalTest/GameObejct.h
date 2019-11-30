@@ -22,6 +22,8 @@ public:
 	void SetTexture(ID3D11ShaderResourceView* texture);
 	// 设置矩阵
 	void SetWorldMatrix(const DirectX::XMFLOAT4X4& world);
+	// 设置材质
+	void SetMaterial(Material material);
 	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX world);
 	// 绘制
 	void Draw(ID3D11DeviceContext* deviceContext);
@@ -36,6 +38,7 @@ private:
 	ComPtr<ID3D11Buffer> m_pIndexBuffer;                // 索引缓冲区
 	UINT m_VertexStride;                                // 顶点字节大小
 	UINT m_IndexCount;                                  // 索引数目 
+	Material m_Material;								// 材质
 };
 
 template<class VertexType, class IndexType>

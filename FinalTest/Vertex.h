@@ -92,6 +92,16 @@ struct VertexPosNormalColor
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
 };
 
+// 物体表面材质
+struct Material
+{
+	Material() { memset(this, 0, sizeof(Material)); }
+
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 specular; // w = 镜面反射强度
+	DirectX::XMFLOAT4 reflect;
+};
 
 struct VertexPosNormalTex
 {
@@ -136,16 +146,79 @@ struct VertexPosNormalTangentTex
 struct CBChangesEveryDrawing
 {
 	DirectX::XMMATRIX world;
-	//DirectX::XMMATRIX worldInvTranspose;
+	DirectX::XMMATRIX worldInvTranspose;
+	Material material;	
 };
 
 struct CBChangesEveryFrame
 {
 	DirectX::XMMATRIX view;
-	//DirectX::XMFLOAT4 eyePos;
+	DirectX::XMFLOAT4 eyePos;
 };
 
 struct CBChangesOnResize
 {
 	DirectX::XMMATRIX proj;
+};
+
+
+struct DirectionalLight
+{
+	DirectionalLight() { memset(this, 0, sizeof(DirectionalLight)); }
+
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 specular;
+	DirectX::XMFLOAT3 direction;
+	float Pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
+};
+
+// 点光
+struct PointLight
+{
+	PointLight() { memset(this, 0, sizeof(PointLight)); }
+
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 specular;
+
+	// 打包成4D向量: (Position, Range)
+	DirectX::XMFLOAT3 position;
+	float range;
+
+	// 打包成4D向量: (A0, A1, A2, Pad)
+	DirectX::XMFLOAT3 att;
+	float Pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
+};
+
+struct SpotLight
+{
+	SpotLight() { memset(this, 0, sizeof(SpotLight)); }
+
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 specular;
+
+	// 打包成4D向量: (Position, Range)
+	DirectX::XMFLOAT3 position;
+	float range;
+
+	// 打包成4D向量: (Direction, Spot)
+	DirectX::XMFLOAT3 direction;
+	float spot;
+
+	// 打包成4D向量: (Att, Pad)
+	DirectX::XMFLOAT3 att;
+	float Pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
+};
+
+struct CBChangesOnLightChange
+{
+	DirectionalLight dLight[10];
+	PointLight pLight[10];
+	SpotLight sLight[10];
+	int numDLight;
+	int numPLight;
+	int numSLight;
+	float pad;
 };

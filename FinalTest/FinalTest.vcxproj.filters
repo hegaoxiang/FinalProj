@@ -151,12 +151,15 @@
     <None Include="HLSL\Triangle.hlsli">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="HLSL\LightHelper.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="HLSL\Triangle_PS02.hlsl">
+    <FxCompile Include="HLSL\LightVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\Triangle_VS03.hlsl">
+    <FxCompile Include="HLSL\LightPS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

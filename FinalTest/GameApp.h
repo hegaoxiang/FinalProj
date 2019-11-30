@@ -23,6 +23,7 @@ private:
 	ComPtr<ID3D11InputLayout> m_pVertexLayout;
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;
 	ComPtr<ID3D11Buffer> m_pConstantBuffers[3];
+	ComPtr<ID3D11Buffer> m_pConstBufferLights;
 	ComPtr<ID3D11Buffer> m_pIndexBuffer;
 	ComPtr<ID3D11SamplerState> m_pSamplerState;
 
@@ -37,6 +38,7 @@ private:
 	std::vector<GameObject> m_Walls;
 
 	CBChangesOnResize m_CBOnResize;
+	CBChangesOnLightChange m_CBOnLightChange;
 	float m_bg[4] = { 0.0f, 0.0f, 1.0f, 1.0f };	// RGBA = (0,0,255,255)
 };
 

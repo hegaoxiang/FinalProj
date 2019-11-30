@@ -22,6 +22,11 @@ void GameObject::SetWorldMatrix(const DirectX::XMFLOAT4X4& world)
 	m_WorldMatrix = world;
 }
 
+void GameObject::SetMaterial(Material material)
+{
+	m_Material = material;
+}
+
 void XM_CALLCONV GameObject::SetWorldMatrix(DirectX::FXMMATRIX world)
 {
 	DirectX::XMStoreFloat4x4(&m_WorldMatrix, world);
@@ -42,7 +47,8 @@ void GameObject::Draw(ID3D11DeviceContext* deviceContext)
 	// 内部进行转置，这样外部就不需要提前转置了
 	XMMATRIX W = XMLoadFloat4x4(&m_WorldMatrix);
 	cbDrawing.world = XMMatrixTranspose(W);
-	
+	cbDrawing.worldInvTranspose = XMMatrixInverse(nullptr, W);
+	cbDrawing.material = m_Material;
 
 	// 更新常量缓冲区
 	D3D11_MAPPED_SUBRESOURCE mappedData;

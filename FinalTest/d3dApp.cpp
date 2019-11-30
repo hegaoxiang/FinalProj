@@ -194,7 +194,7 @@ void D3DApp::OnResize()
 	// 设置视口变换
 	m_ScreenViewport.TopLeftX = 0;
 	m_ScreenViewport.TopLeftY = 0;
-	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth) / 2;
+	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth);
 	m_ScreenViewport.Height = static_cast<float>(m_ClientHeight);
 	m_ScreenViewport.MinDepth = 0.0f;
 	m_ScreenViewport.MaxDepth = 1.0f;
