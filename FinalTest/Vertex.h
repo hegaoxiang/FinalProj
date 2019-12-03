@@ -214,6 +214,7 @@ struct SpotLight
 
 struct CBChangesOnLightChange
 {
+	//DirectX::XMMATRIX reflect;
 	DirectionalLight dLight[10];
 	PointLight pLight[10];
 	SpotLight sLight[10];
@@ -221,4 +222,10 @@ struct CBChangesOnLightChange
 	int numPLight;
 	int numSLight;
 	float pad;
+};
+
+struct CBChangesOnReflect
+{
+	int bIsReflect;
+	DirectX::XMFLOAT3 pad;
 };

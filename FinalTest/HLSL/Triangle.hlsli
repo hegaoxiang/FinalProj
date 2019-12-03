@@ -10,6 +10,12 @@ cbuffer CBChangeEveryDraw : register(b0)
     matrix g_WorldInvTranspose;
 	Material g_Material;
 }
+cbuffer CBDrawingStates : register(b4)
+{
+    int g_IsReflection;
+    float3 g_Pad1;
+}
+
 cbuffer CBChangeEveryFrame : register(b1)
 {
 	matrix g_View;
@@ -21,6 +27,7 @@ cbuffer CBChangeOnResize : register(b2)
 }
 cbuffer CBChangeOnLightChange : register(b3)
 {
+    
     DirectionalLight g_DirectLight[10];
     PointLight g_PointLight[10];
     SpotLight g_SpotLight[10];

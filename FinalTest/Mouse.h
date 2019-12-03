@@ -75,7 +75,7 @@ namespace DirectX
 #pragma prefast(suppress: 26495, "Reset() performs the initialization")
 			ButtonStateTracker() noexcept { Reset(); }
 
-
+			// 获取上一帧的鼠标事件，应当在Update之前使用，否则变为获取当前帧的状态
 			void __cdecl Update(const State& state);
 
 

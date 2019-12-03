@@ -2,6 +2,7 @@
 #include<d3d11.h>
 #include<DirectXMath.h>
 #include <wrl/client.h>
+#include <DirectXCollision.h>
 #include"Geometry.h"
 #include "DXTrace.h"
 using namespace DirectX;
@@ -32,6 +33,7 @@ public:
 	// 若缓冲区被重新设置，调试对象名也需要被重新设置
 	void SetDebugObjectName(const std::string& name);
 	ComPtr<ID3D11ShaderResourceView> m_pTexture;        // 纹理
+	
 private:
 	DirectX::XMFLOAT4X4 m_WorldMatrix;                  // 世界矩阵
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;               // 顶点缓冲区

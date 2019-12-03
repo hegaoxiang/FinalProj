@@ -3,6 +3,7 @@
 #include "d3dApp.h"
 #include "Camera.h"
 #include "GameObejct.h"
+#include "RenderStates.h"
 class GameApp : public D3DApp
 {
 public:
@@ -25,7 +26,7 @@ private:
 	ComPtr<ID3D11Buffer> m_pConstantBuffers[3];
 	ComPtr<ID3D11Buffer> m_pConstBufferLights;
 	ComPtr<ID3D11Buffer> m_pIndexBuffer;
-	ComPtr<ID3D11SamplerState> m_pSamplerState;
+
 
 	ComPtr<ID3D11ShaderResourceView> m_pWoodCrate;
 	ComPtr<ID3D11ShaderResourceView> m_pTemp[6];
@@ -36,6 +37,7 @@ private:
 	GameObject m_WoodCrate;
 	GameObject m_Floor;
 	std::vector<GameObject> m_Walls;
+	GameObject m_Water;
 
 	CBChangesOnResize m_CBOnResize;
 	CBChangesOnLightChange m_CBOnLightChange;
