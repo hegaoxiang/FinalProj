@@ -1,7 +1,7 @@
 #include "GameApp.h"
 #include "d3dUtil.h"
 #include "DXTrace.h"
-
+#include "BasicEffect.h"
 using namespace DirectX;
 
 
@@ -21,7 +21,6 @@ bool GameApp::Init()
 	m_pMouse = std::make_unique<Mouse>();
 	m_pKeyboard = std::make_unique<Keyboard>();
 
-	
 
 	if (!D3DApp::Init())
 		return false;
@@ -44,14 +43,7 @@ void GameApp::OnResize()
 		m_pCamera->SetViewPort(m_ScreenViewport);
 
 
-		CBChangesOnResize cbOnResize;
-		cbOnResize.proj = XMMatrixTranspose(m_pCamera->GetProjXM());
-		
-		D3D11_MAPPED_SUBRESOURCE mappedData;
-		HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[2].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-		memcpy_s(mappedData.pData, sizeof(CBChangesOnResize), &cbOnResize, sizeof(CBChangesOnResize));
-		m_pd3dImmediateContext->Unmap(m_pConstantBuffers[2].Get(), 0);
-
+		BasicEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
 	}
 }
 
@@ -76,7 +68,7 @@ void GameApp::UpdateScene(float dt)
 	m_KeyboardTracker.Update(keyState);
 	
 	int w = mouseState.rightButton;
-	CBChangesEveryFrame cbEveryFrame;
+
 	
 	ImGui::Begin("Editor");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 	ImGui::ColorEdit4("colorbg", (float*)&m_bg);
@@ -151,8 +143,8 @@ void GameApp::UpdateScene(float dt)
 
 	// 更新观察矩阵
 	m_pCamera->UpdateViewMatrix();
-	XMStoreFloat4(&cbEveryFrame.eyePos, m_pCamera->GetPositionXM());
-	cbEveryFrame.view = XMMatrixTranspose(m_pCamera->GetViewXM());
+	BasicEffect::Get().SetViewMatrix(m_pCamera->GetViewXM());
+	BasicEffect::Get().SetEyePos(m_pCamera->GetPositionXM());
 
 	// 重置滚轮值
 	m_pMouse->ResetScrollWheelValue();
@@ -209,12 +201,6 @@ void GameApp::UpdateScene(float dt)
 	// 退出程序，这里应向窗口发送销毁信息
 	if (keyState.IsKeyDown(Keyboard::Escape))
 		SendMessage(MainWnd(), WM_DESTROY, 0, 0);
-
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	
-	HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[1].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesEveryFrame), &cbEveryFrame, sizeof(CBChangesEveryFrame));
-	m_pd3dImmediateContext->Unmap(m_pConstantBuffers[1].Get(), 0);
 }
 
 void GameApp::DrawScene()
@@ -261,69 +247,51 @@ void GameApp::DrawScene()
 	// ********************
 	// 1. 绘制不透明对象
 	//
-	m_pd3dImmediateContext->RSSetState(nullptr);
-	m_pd3dImmediateContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
-	m_pd3dImmediateContext->PSSetSamplers(0, 1, RenderStates::SSLinearWrap.GetAddressOf());
+	BasicEffect::Get().SetRenderDefault(m_pd3dImmediateContext.Get());
+
 
 	for (auto& wall : m_Walls)
-		wall.Draw(m_pd3dImmediateContext.Get());
-	m_Floor.Draw(m_pd3dImmediateContext.Get());
+		wall.Draw(m_pd3dImmediateContext.Get(),BasicEffect::Get());
+	m_Floor.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
 
 	// ********************
 	// 2. 绘制透明对象
 	//
-	m_pd3dImmediateContext->RSSetState(RenderStates::RSNoCull.Get());
-	m_pd3dImmediateContext->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);
-
+	
+	BasicEffect::Get().SetRenderAlphaBlend(m_pd3dImmediateContext.Get());
 
 	// 篱笆盒稍微抬起一点高度
 	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(2.0f, 0.01f, 0.0f));
-	m_WoodCrate.Draw(m_pd3dImmediateContext.Get());
+	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
 	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(-2.0f, 0.01f, 0.0f));
-	m_WoodCrate.Draw(m_pd3dImmediateContext.Get());
+	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
 	// 绘制了篱笆盒后再绘制水面
-	m_Water.Draw(m_pd3dImmediateContext.Get());
+	m_Water.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 	HR(m_pSwapChain->Present(0, 0));
 }
 
 bool GameApp::InitShader()
 {
-	ComPtr<ID3DBlob> blob;
 
-	// 创建顶点着色器
-	HR(CreateShaderFromFile(L"HLSL\\LightVS.cso", L"HLSL\\LightVS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
-	HR(m_pd3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pVertexShader.GetAddressOf()));
-	// 创建并绑定顶点布局
-	HR(m_pd3dDevice->CreateInputLayout(VertexPosNormalTex::inputLayout, ARRAYSIZE(VertexPosNormalTex::inputLayout),
-		blob->GetBufferPointer(), blob->GetBufferSize(), m_pVertexLayout.GetAddressOf()));
-
-	// 创建像素着色器
-	HR(CreateShaderFromFile(L"HLSL\\LightPS.cso", L"HLSL\\LightPS.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
-	HR(m_pd3dDevice->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pPixelShader.GetAddressOf()));
-
-	return true;
+	if (BasicEffect::Get().InitAll(m_pd3dDevice.Get()))
+		return true;
+	return false;
 }
 
 bool GameApp::InitResource()
 {
 	m_CameraMode = CameraMode::FirstPerson;
-
 	auto camera = std::shared_ptr<FirstPersonCamera>(new FirstPersonCamera);
-
 	m_pCamera = camera;
-
 	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
-
 	camera->LookAt(XMFLOAT3(), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	// 初始化仅在窗口大小变动时修改的值
-
 	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
-
 	// 更新Proj矩阵
-	m_CBOnResize.proj = XMMatrixTranspose(m_pCamera->GetProjXM());
-
+	BasicEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
 #pragma region 初始化游戏对象
 	// 
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -370,34 +338,13 @@ bool GameApp::InitResource()
 	m_Water.SetMaterial(material);
 #pragma endregion
 
-	// 设置常量缓冲区描述
-	D3D11_BUFFER_DESC cbd;
-	ZeroMemory(&cbd, sizeof(cbd));
-	cbd.Usage = D3D11_USAGE_DYNAMIC;
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbd.ByteWidth = sizeof(CBChangesEveryDrawing);
-	HR(m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstantBuffers[0].GetAddressOf()));
 	
-	cbd.ByteWidth = sizeof(CBChangesEveryFrame);
-	HR(m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstantBuffers[1].GetAddressOf()));
-	cbd.ByteWidth = sizeof(CBChangesOnResize);
-	HR(m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstantBuffers[2].GetAddressOf()));
-	cbd.ByteWidth = sizeof(CBChangesOnLightChange);
-	HR(m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstBufferLights.GetAddressOf()));
-
-	// 设置图元类型，设定输入布局
-	m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
-	
-	// 初始化所有渲染状态
-	RenderStates::InitAll(m_pd3dDevice.Get());
 	
 	// ******************
 	// 初始化默认光照
-	auto& m_DirLight = m_CBOnLightChange.dLight[0];
-	auto& m_PointLight = m_CBOnLightChange.pLight[0];
-	auto& m_SpotLight = m_CBOnLightChange.sLight[0];
+	auto& m_DirLight = m_dLight[0];
+	auto& m_PointLight = m_pLight[0];
+	auto& m_SpotLight = m_sLight[0];
 	// 方向光
 	m_DirLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_DirLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
@@ -420,39 +367,13 @@ bool GameApp::InitResource()
 	m_SpotLight.spot = 12.0f;
 	m_SpotLight.range = 10000.0f;
 
-	m_CBOnLightChange.numDLight = 1;
-	m_CBOnLightChange.numPLight = 1;
-	m_CBOnLightChange.numSLight = 1;
 
-	//m_CBOnLightChange.reflect = XMMatrixTranspose(XMMatrixReflect())
+	for (int i = 0; i < 10; i++)
+	{
+		BasicEffect::Get().SetDirLight(i, m_dLight[i]);
+		BasicEffect::Get().SetPointLight(i, m_pLight[i]);
+		BasicEffect::Get().SetSpotLight(i, m_sLight[i]);
+	}
 
-	// 更新不容易被修改的常量缓冲区资源
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(m_pd3dImmediateContext->Map(m_pConstantBuffers[2].Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesOnResize), &m_CBOnResize, sizeof(CBChangesOnResize));
-	m_pd3dImmediateContext->Unmap(m_pConstantBuffers[2].Get(), 0);
-
-	HR(m_pd3dImmediateContext->Map(m_pConstBufferLights.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesOnLightChange), &m_CBOnLightChange, sizeof(CBChangesOnLightChange));
-	m_pd3dImmediateContext->Unmap(m_pConstBufferLights.Get(), 0);
-
-	// 将着色器绑定到渲染管线
-	m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
-	m_pd3dImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
-
-	// 预先绑定各自所需的缓冲区，其中每帧更新的缓冲区需要绑定到两个缓冲区上
-	m_pd3dImmediateContext->VSSetConstantBuffers(0, 1, m_pConstantBuffers[0].GetAddressOf());
-	m_pd3dImmediateContext->VSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
-	m_pd3dImmediateContext->VSSetConstantBuffers(2, 1, m_pConstantBuffers[2].GetAddressOf());
-
-	m_pd3dImmediateContext->PSSetConstantBuffers(0, 1, m_pConstantBuffers[0].GetAddressOf());
-	m_pd3dImmediateContext->PSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
-	m_pd3dImmediateContext->PSSetConstantBuffers(3, 1, m_pConstBufferLights.GetAddressOf());
-
-	m_pd3dImmediateContext->VSSetSamplers(0, 1, RenderStates::SSLinearWrap.GetAddressOf());
-
-	m_pd3dImmediateContext->RSSetState(RenderStates::RSNoCull.Get());
-
-	m_pd3dImmediateContext->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);
 	return true;
 }

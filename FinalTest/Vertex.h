@@ -143,23 +143,6 @@ struct VertexPosNormalTangentTex
 	DirectX::XMFLOAT2 tex;
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
 };
-struct CBChangesEveryDrawing
-{
-	DirectX::XMMATRIX world;
-	DirectX::XMMATRIX worldInvTranspose;
-	Material material;	
-};
-
-struct CBChangesEveryFrame
-{
-	DirectX::XMMATRIX view;
-	DirectX::XMFLOAT4 eyePos;
-};
-
-struct CBChangesOnResize
-{
-	DirectX::XMMATRIX proj;
-};
 
 
 struct DirectionalLight
@@ -212,20 +195,3 @@ struct SpotLight
 	float Pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
 };
 
-struct CBChangesOnLightChange
-{
-	//DirectX::XMMATRIX reflect;
-	DirectionalLight dLight[10];
-	PointLight pLight[10];
-	SpotLight sLight[10];
-	int numDLight;
-	int numPLight;
-	int numSLight;
-	float pad;
-};
-
-struct CBChangesOnReflect
-{
-	int bIsReflect;
-	DirectX::XMFLOAT3 pad;
-};

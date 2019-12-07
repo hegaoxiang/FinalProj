@@ -32,31 +32,16 @@ void XM_CALLCONV GameObject::SetWorldMatrix(DirectX::FXMMATRIX world)
 	DirectX::XMStoreFloat4x4(&m_WorldMatrix, world);
 }
 
-void GameObject::Draw(ID3D11DeviceContext* deviceContext)
+void GameObject::Draw(ID3D11DeviceContext* deviceContext, BasicEffect& effect)
 {
 	UINT offset = 0;
 	deviceContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &m_VertexStride, &offset);
-	
 	deviceContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 
-	// 获取之前已经绑定到渲染管线上的常量缓冲区并进行修改
-	ComPtr<ID3D11Buffer> cBuffer = nullptr;
-	deviceContext->VSGetConstantBuffers(0, 1, cBuffer.GetAddressOf());
-	CBChangesEveryDrawing cbDrawing;
-
-	// 内部进行转置，这样外部就不需要提前转置了
-	XMMATRIX W = XMLoadFloat4x4(&m_WorldMatrix);
-	cbDrawing.world = XMMatrixTranspose(W);
-	cbDrawing.worldInvTranspose = XMMatrixInverse(nullptr, W);
-	cbDrawing.material = m_Material;
-
-	// 更新常量缓冲区
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(deviceContext->Map(cBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesEveryDrawing), &cbDrawing, sizeof(CBChangesEveryDrawing));
-	deviceContext->Unmap(cBuffer.Get(), 0);
-	// 设置纹理
-	deviceContext->PSSetShaderResources(0, 1, m_pTexture.GetAddressOf());
+	effect.SetWorldMatrix(XMLoadFloat4x4(&m_WorldMatrix));
+	effect.SetMaterial(m_Material);
+	effect.SetTexture(m_pTexture.Get());
+	effect.Apply(deviceContext);
 	// 可以开始绘制
 	deviceContext->DrawIndexed(m_IndexCount, 0, 0);
 }

@@ -10,11 +10,6 @@ cbuffer CBChangeEveryDraw : register(b0)
     matrix g_WorldInvTranspose;
 	Material g_Material;
 }
-cbuffer CBDrawingStates : register(b4)
-{
-    int g_IsReflection;
-    float3 g_Pad1;
-}
 
 cbuffer CBChangeEveryFrame : register(b1)
 {

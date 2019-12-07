@@ -19,15 +19,6 @@ public:
 	bool InitResource();
 	
 private:
-	ComPtr<ID3D11VertexShader> m_pVertexShader;
-	ComPtr<ID3D11PixelShader> m_pPixelShader;
-	ComPtr<ID3D11InputLayout> m_pVertexLayout;
-	ComPtr<ID3D11Buffer> m_pVertexBuffer;
-	ComPtr<ID3D11Buffer> m_pConstantBuffers[3];
-	ComPtr<ID3D11Buffer> m_pConstBufferLights;
-	ComPtr<ID3D11Buffer> m_pIndexBuffer;
-
-
 	ComPtr<ID3D11ShaderResourceView> m_pWoodCrate;
 	ComPtr<ID3D11ShaderResourceView> m_pTemp[6];
 
@@ -39,8 +30,9 @@ private:
 	std::vector<GameObject> m_Walls;
 	GameObject m_Water;
 
-	CBChangesOnResize m_CBOnResize;
-	CBChangesOnLightChange m_CBOnLightChange;
+	DirectionalLight m_dLight[10];
+	PointLight m_pLight[10];
+	SpotLight m_sLight[10];
 	float m_bg[4] = { 0.0f, 0.0f, 1.0f, 1.0f };	// RGBA = (0,0,255,255)
 };
 
