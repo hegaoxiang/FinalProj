@@ -1,6 +1,9 @@
 #pragma once
 #include "CBuffer.h"
 #include <memory>
+#include <d3dcompiler.h>
+#include <vector>
+#include "RenderStates.h"
 class IEffect
 {
 public:

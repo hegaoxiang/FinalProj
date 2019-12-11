@@ -2,6 +2,9 @@
 #include "d3dUtil.h"
 #include "DXTrace.h"
 #include "BasicEffect.h"
+#include "PostEffect.h"
+#include "WireEffect.h"
+#include "Collision.h"
 using namespace DirectX;
 
 
@@ -42,8 +45,8 @@ void GameApp::OnResize()
 		m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.f);
 		m_pCamera->SetViewPort(m_ScreenViewport);
 
-
 		BasicEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
+		WireEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
 	}
 }
 
@@ -72,7 +75,7 @@ void GameApp::UpdateScene(float dt)
 	
 	ImGui::Begin("Editor");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 	ImGui::ColorEdit4("colorbg", (float*)&m_bg);
-
+	ImGui::Checkbox("PostProcess", & isPostProcess);
 	ImGui::DragInt("button", &w);
 	//ImGui::SliderInt("textureIdx", &i, 0, 5);
 
@@ -145,6 +148,7 @@ void GameApp::UpdateScene(float dt)
 	m_pCamera->UpdateViewMatrix();
 	BasicEffect::Get().SetViewMatrix(m_pCamera->GetViewXM());
 	BasicEffect::Get().SetEyePos(m_pCamera->GetPositionXM());
+	WireEffect::Get().SetViewMatrix(m_pCamera->GetViewXM());
 
 	// 重置滚轮值
 	m_pMouse->ResetScrollWheelValue();
@@ -213,37 +217,12 @@ void GameApp::DrawScene()
 	
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_bg);
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	/*
-	for (size_t i = 0; i < 2; i++)
-	{
-		
-		if (i == 1)
-		{
-			m_ScreenViewport.TopLeftX = 0;
-			m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
-		}
-		else
-		{
-			m_ScreenViewport.TopLeftX = static_cast<float>(m_ClientWidth) / 2;
-			m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
-		}
-		
-
-
-		m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_WoodCrate.m_pTexture.GetAddressOf());
-		m_WoodCrate.Draw(m_pd3dImmediateContext.Get());
 	
-		m_pd3dImmediateContext->PSSetShaderResources(0, 1, m_Floor.m_pTexture.GetAddressOf());
-		m_Floor.Draw(m_pd3dImmediateContext.Get());
 
-		for (auto& wall : m_Walls)
-		{
-			m_pd3dImmediateContext->PSSetShaderResources(0, 1, wall.m_pTexture.GetAddressOf());
-			wall.Draw(m_pd3dImmediateContext.Get());
-		}
-		
-	}*/
 	
+
+	if(isPostProcess)
+		m_pFullScreen->Begin(m_pd3dImmediateContext.Get());
 	// ********************
 	// 1. 绘制不透明对象
 	//
@@ -251,8 +230,8 @@ void GameApp::DrawScene()
 
 
 	for (auto& wall : m_Walls)
-		wall.Draw(m_pd3dImmediateContext.Get(),BasicEffect::Get());
-	m_Floor.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
+		wall.Draw(m_pd3dImmediateContext.Get(),&BasicEffect::Get());
+	m_Floor.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
 
 	// ********************
 	// 2. 绘制透明对象
@@ -262,11 +241,69 @@ void GameApp::DrawScene()
 
 	// 篱笆盒稍微抬起一点高度
 	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(2.0f, 0.01f, 0.0f));
-	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
+	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
+	{
+		WireEffect::Get().SetWireRender(m_pd3dImmediateContext.Get());
+		auto wire = Collision::CreateBoundingBox(m_WoodCrate.GetLocalBoundingBox(), XMFLOAT4(0.5, 0.1, 0.1, 1.0));
+
+		ComPtr<ID3D11Buffer> m_pVertexBuffer;
+		ComPtr<ID3D11Buffer> m_pIndexBuffer;
+
+		auto m_VertexStride = sizeof(VertexPosColor);
+		// 设置顶点缓冲区描述
+		D3D11_BUFFER_DESC vbd;
+		ZeroMemory(&vbd, sizeof(vbd));
+		vbd.Usage = D3D11_USAGE_IMMUTABLE;
+		vbd.ByteWidth = m_VertexStride * wire.vertexVec.size();
+		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vbd.CPUAccessFlags = 0;
+		// 新建顶点缓冲区
+		D3D11_SUBRESOURCE_DATA InitData;
+		ZeroMemory(&InitData, sizeof(InitData));
+		InitData.pSysMem = wire.vertexVec.data();
+		HR(m_pd3dDevice->CreateBuffer(&vbd, &InitData, m_pVertexBuffer.GetAddressOf()));
+
+		UINT m_IndexCount = (UINT)wire.indexVec.size();
+		// 设置索引缓冲区描述
+		D3D11_BUFFER_DESC ibd;
+		ZeroMemory(&ibd, sizeof(ibd));
+		ibd.Usage = D3D11_USAGE_IMMUTABLE;
+		ibd.ByteWidth = sizeof(WORD) * m_IndexCount;
+		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibd.CPUAccessFlags = 0;
+		// 新建索引缓冲区
+		InitData.pSysMem = wire.indexVec.data();
+		HR(m_pd3dDevice->CreateBuffer(&ibd, &InitData, m_pIndexBuffer.GetAddressOf()));
+		// 输入装配阶段的索引缓冲区设置
+
+		UINT offset = 0;
+		m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &m_VertexStride, &offset);
+		m_pd3dImmediateContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
+		WireEffect::Get().Apply(m_pd3dImmediateContext.Get());
+		m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
+
+		BasicEffect::Get().SetRenderAlphaBlend(m_pd3dImmediateContext.Get());
+	}
+	
+
 	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(-2.0f, 0.01f, 0.0f));
-	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
+	//m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
 	// 绘制了篱笆盒后再绘制水面
-	m_Water.Draw(m_pd3dImmediateContext.Get(), BasicEffect::Get());
+	//m_Water.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
+
+	if (isPostProcess)
+	{
+		m_pFullScreen->End(m_pd3dImmediateContext.Get());
+
+		PostEffect::Get().SetRenderDefault(m_pd3dImmediateContext.Get());
+
+		m_Post.SetTexture(m_pFullScreen->GetOutputTexture());
+		m_Post.Draw(m_pd3dImmediateContext.Get(), &PostEffect::Get());
+
+		PostEffect::Get().SetTexture(nullptr);
+		PostEffect::Get().Apply(m_pd3dImmediateContext.Get());
+	}
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -276,9 +313,16 @@ void GameApp::DrawScene()
 bool GameApp::InitShader()
 {
 
-	if (BasicEffect::Get().InitAll(m_pd3dDevice.Get()))
-		return true;
-	return false;
+	if (!BasicEffect::Get().InitAll(m_pd3dDevice.Get()))
+		return false;
+
+	if (!PostEffect::Get().InitAll(m_pd3dDevice.Get()))
+		return false;
+	
+	if (!WireEffect::Get().InitAll(m_pd3dDevice.Get()))
+		return false;
+
+	return true;
 }
 
 bool GameApp::InitResource()
@@ -292,6 +336,7 @@ bool GameApp::InitResource()
 	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
 	// 更新Proj矩阵
 	BasicEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
+	WireEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
 #pragma region 初始化游戏对象
 	// 
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -338,8 +383,7 @@ bool GameApp::InitResource()
 	m_Water.SetMaterial(material);
 #pragma endregion
 
-	
-	
+#pragma region 初始化光照
 	// ******************
 	// 初始化默认光照
 	auto& m_DirLight = m_dLight[0];
@@ -367,7 +411,9 @@ bool GameApp::InitResource()
 	m_SpotLight.spot = 12.0f;
 	m_SpotLight.range = 10000.0f;
 
+#pragma endregion
 
+	m_Post.SetBuffer(m_pd3dDevice.Get(), Geometry::Create2DShow());
 	for (int i = 0; i < 10; i++)
 	{
 		BasicEffect::Get().SetDirLight(i, m_dLight[i]);
@@ -375,5 +421,6 @@ bool GameApp::InitResource()
 		BasicEffect::Get().SetSpotLight(i, m_sLight[i]);
 	}
 
+	m_pFullScreen = std::make_unique<TextureRender>(m_pd3dDevice.Get(), m_ScreenViewport.Width, m_ScreenViewport.Height) ;
 	return true;
 }

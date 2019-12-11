@@ -1,9 +1,4 @@
 #include "BasicEffect.h"
-
-#include "CBuffer.h"
-#include <d3dcompiler.h>
-#include <vector>
-#include "RenderStates.h"
 #include "DXTrace.h"
 using namespace DirectX;
 
@@ -89,6 +84,7 @@ BasicEffect::BasicEffect()
 
 BasicEffect::~BasicEffect()
 {
+	delete g_pInstance;
 }
 
 BasicEffect::BasicEffect(BasicEffect&& moveFrom) noexcept

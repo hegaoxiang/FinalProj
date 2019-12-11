@@ -96,8 +96,7 @@ public:
 	void Pitch(float rad);
 	// 左右观察
 	void RotateY(float rad);
-
-
+	
 	// 更新观察矩阵
 	void UpdateViewMatrix() override;
 };

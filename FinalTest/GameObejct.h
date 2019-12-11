@@ -5,11 +5,13 @@
 #include <DirectXCollision.h>
 #include"Geometry.h"
 #include "DXTrace.h"
-#include "BasicEffect.h"
+#include <DirectXCollision.h>
+
 using namespace DirectX;
 template<class T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
+class IEffect;
 class GameObject
 {
 public:
@@ -17,6 +19,15 @@ public:
 
 	// 获取位置
 	DirectX::XMFLOAT3 GetPosition() const;
+
+	//
+	// 获取包围盒
+	//
+
+	DirectX::BoundingBox GetLocalBoundingBox() const;
+	DirectX::BoundingBox GetBoundingBox() const;
+	DirectX::BoundingOrientedBox GetBoundingOrientedBox() const;
+
 	// 设置缓冲区
 	template<class VertexType, class IndexType>
 	void SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData);
@@ -28,7 +39,7 @@ public:
 	void SetMaterial(Material material);
 	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX world);
 	// 绘制
-	void Draw(ID3D11DeviceContext* deviceContext, BasicEffect& effect);
+	void Draw(ID3D11DeviceContext* deviceContext, IEffect* effect);
 
 	// 设置调试对象名
 	// 若缓冲区被重新设置，调试对象名也需要被重新设置
@@ -42,6 +53,8 @@ private:
 	UINT m_VertexStride;                                // 顶点字节大小
 	UINT m_IndexCount;                                  // 索引数目 
 	Material m_Material;								// 材质
+
+	DirectX::BoundingBox m_BoundingBox;
 };
 
 template<class VertexType, class IndexType>

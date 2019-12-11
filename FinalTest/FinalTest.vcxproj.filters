@@ -13,11 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{e48c807a-949f-4dde-8470-5e612b2a15d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effect">
+      <UniqueIdentifier>{91c1bef6-9714-4440-bb35-04321b31a269}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Imgui">
       <UniqueIdentifier>{ecdb2e59-bd13-4e65-b483-2b78b8350cd0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HLSL">
-      <UniqueIdentifier>{e48c807a-949f-4dde-8470-5e612b2a15d0}</UniqueIdentifier>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{033a9d8d-9c87-4fe6-846e-23da1687572a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MouseAndKeyboard">
+      <UniqueIdentifier>{bbaad170-9d96-4299-86a5-a6e8e9654af5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -48,22 +57,10 @@
     <ClInclude Include="d3dApp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="d3dUtil.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="GameTimer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="GameApp.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DXTrace.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="DDSTextureLoader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WICTextureLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Geometry.h">
@@ -75,12 +72,6 @@
     <ClInclude Include="Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Mouse.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="GameObejct.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -90,11 +81,41 @@
     <ClInclude Include="CBuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IEffect.h">
+    <ClInclude Include="TextureRender.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IEffect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
     <ClInclude Include="BasicEffect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="PostEffect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dUtil.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTrace.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="WireEffect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>MouseAndKeyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>MouseAndKeyboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,22 +143,10 @@
     <ClCompile Include="d3dApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="d3dUtil.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GameTimer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GameApp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DXTrace.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
@@ -149,12 +158,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GameObejct.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -164,11 +167,38 @@
     <ClCompile Include="CBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="IEffect.cpp">
+    <ClCompile Include="TextureRender.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="BasicEffect.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="PostEffect.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="DXTrace.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dUtil.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="WireEffect.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>MouseAndKeyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>MouseAndKeyboard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -178,12 +208,30 @@
     <None Include="HLSL\LightHelper.hlsli">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="HLSL\Post.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\WireFrame.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\LightVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\LightPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PostVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PostPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\WireFrameVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\WireFramePS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
