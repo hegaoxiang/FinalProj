@@ -4,13 +4,16 @@
 
 
 GameObject::GameObject()
-	: m_IndexCount(), m_VertexStride()
 {
-	XMStoreFloat4x4(&m_WorldMatrix, DirectX::XMMatrixIdentity());
+	Init();
 }
-DirectX::XMFLOAT3 GameObject::GetPosition() const
+
+void GameObject::Init()
 {
-	return DirectX::XMFLOAT3(m_WorldMatrix(3, 0), m_WorldMatrix(3, 1), m_WorldMatrix(3, 2));
+	m_Components.insert(std::pair<const std::string&, ComponentPtr>("ModelComponent", new ModelComponent()));
+	m_Components["ModelComponent"]->SetRoot(this);
+	m_Components.insert(std::pair<const std::string&, ComponentPtr>("BasicTextureComponent", new BasicTextureComponent()));
+	m_Components["BasicTextureComponent"]->SetRoot(this);
 }
 
 DirectX::BoundingBox GameObject::GetLocalBoundingBox() const
@@ -33,49 +36,30 @@ DirectX::BoundingOrientedBox GameObject::GetBoundingOrientedBox() const
 	return box;
 }
 
-void GameObject::SetTexture(ID3D11ShaderResourceView* texture)
-{
-	m_pTexture = texture;
-}
 
-void GameObject::SetWorldMatrix(const DirectX::XMFLOAT4X4& world)
-{
-	m_WorldMatrix = world;
-}
-
-void GameObject::SetMaterial(Material material)
-{
-	m_Material = material;
-}
-
-void XM_CALLCONV GameObject::SetWorldMatrix(DirectX::FXMMATRIX world)
-{
-	DirectX::XMStoreFloat4x4(&m_WorldMatrix, world);
-}
 
 void GameObject::Draw(ID3D11DeviceContext* deviceContext, IEffect* effect)
 {
+	
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components["BasicTextureComponent"]);
+
+	if (modelComp == nullptr || bcTexComp == nullptr)
+		throw "one Component is not exit";
+	for (auto item : m_Components)
+	{
+		item.second->ApplyToDraw(deviceContext, effect);
+	}
 	auto basicEffect = dynamic_cast<BasicEffect*>(effect);
 	auto postEffect = dynamic_cast<PostEffect*>(effect);
-	UINT offset = 0;
-	deviceContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &m_VertexStride, &offset);
-	deviceContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 
 	if (basicEffect)
 	{
-		basicEffect->SetWorldMatrix(XMLoadFloat4x4(&m_WorldMatrix));
-		basicEffect->SetMaterial(m_Material);
-		basicEffect->SetTexture(m_pTexture.Get());
-		basicEffect->Apply(deviceContext);
-	}
-	else if (postEffect)
-	{
-		postEffect->SetTexture(m_pTexture.Get());
-		postEffect->Apply(deviceContext);
+		
 	}
 
 	// 可以开始绘制
-	deviceContext->DrawIndexed(m_IndexCount, 0, 0);
+	deviceContext->DrawIndexed(, 0, 0);
 }
 
 void GameObject::SetDebugObjectName(const std::string& name)

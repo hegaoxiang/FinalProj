@@ -253,13 +253,13 @@ void BasicEffect::Apply(ID3D11DeviceContext* deviceContext)
 {
 	auto& pCBuffers = pImpl->m_pCBuffers;
 	// 将缓冲区绑定到渲染管线上
-	pCBuffers[0]->BindVS(deviceContext);
-	pCBuffers[1]->BindVS(deviceContext);
-	pCBuffers[2]->BindVS(deviceContext);
+	pCBuffers[0]->BindVS(deviceContext);// 世界矩阵和材质
+	pCBuffers[1]->BindVS(deviceContext);// 相机位置
+	pCBuffers[2]->BindVS(deviceContext);// 投影变换
 
 	pCBuffers[0]->BindPS(deviceContext);
 	pCBuffers[1]->BindPS(deviceContext);
-	pCBuffers[3]->BindPS(deviceContext);
+	pCBuffers[3]->BindPS(deviceContext);// 灯光设置
 
 	// 设置纹理
 	deviceContext->PSSetShaderResources(0, 1, pImpl->m_pTexture.GetAddressOf());

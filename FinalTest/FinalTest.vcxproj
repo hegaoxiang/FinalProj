@@ -154,9 +154,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BasicEffect.h" />
+    <ClInclude Include="BasicTextureComponent.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBuffer.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="d3dApp.h" />
     <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="IMGui\imstb_textedit.h" />
     <ClInclude Include="IMGui\imstb_truetype.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="ModelComponent.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="PostEffect.h" />
     <ClInclude Include="RenderStates.h" />
@@ -185,9 +188,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BasicEffect.cpp" />
+    <ClCompile Include="BasicTextureComponent.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CBuffer.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="d3dApp.cpp" />
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
@@ -204,6 +209,7 @@
     <ClCompile Include="IMGui\imgui_impl_win32.cpp" />
     <ClCompile Include="IMGui\imgui_widgets.cpp" />
     <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="ModelComponent.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PostEffect.cpp" />
     <ClCompile Include="RenderStates.cpp" />

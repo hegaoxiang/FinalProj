@@ -28,6 +28,9 @@
     <Filter Include="MouseAndKeyboard">
       <UniqueIdentifier>{bbaad170-9d96-4299-86a5-a6e8e9654af5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Actor">
+      <UniqueIdentifier>{82dcd6b5-954d-43f6-b067-31eaa5432e2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IMGui\imconfig.h">
@@ -72,9 +75,6 @@
     <ClInclude Include="Camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="GameObejct.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="RenderStates.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -117,6 +117,18 @@
     <ClInclude Include="Mouse.h">
       <Filter>MouseAndKeyboard</Filter>
     </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObejct.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelComponent.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicTextureComponent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalTest.cpp">
@@ -158,9 +170,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="GameObejct.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RenderStates.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -199,6 +208,18 @@
     </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>MouseAndKeyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObejct.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelComponent.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicTextureComponent.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
