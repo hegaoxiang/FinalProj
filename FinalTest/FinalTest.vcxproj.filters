@@ -127,7 +127,7 @@
       <Filter>Actor</Filter>
     </ClInclude>
     <ClInclude Include="BasicTextureComponent.h">
-      <Filter>头文件</Filter>
+      <Filter>Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -219,7 +219,7 @@
       <Filter>Actor</Filter>
     </ClCompile>
     <ClCompile Include="BasicTextureComponent.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Actor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

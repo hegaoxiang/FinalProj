@@ -10,9 +10,11 @@
 using namespace DirectX;
 
 class IEffect;
+
 class Component;
 using ComponentPtr = Component*;
-using ComponentMap = std::map<const std::string&, ComponentPtr >;
+using ComponentID = unsigned short;
+typedef  std::map<ComponentID, ComponentPtr > ComponentMap;
 
 class GameObject
 {
@@ -28,8 +30,33 @@ public:
 	DirectX::BoundingBox GetBoundingBox() const;
 	DirectX::BoundingOrientedBox GetBoundingOrientedBox() const;
 
+	///
+	/// modelComponent
+	///
 
+	// 获取位置
+	DirectX::XMFLOAT3 GetPosition() ;
+
+	// 设置位置矩阵
+	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX world);
+	void SetWorldMatrix(const DirectX::XMFLOAT4X4& world);
+
+	// 设置缓冲区
+	template<class VertexType, class IndexType>
+	void SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData);
 	
+
+	///
+	/// basicTextureComponent
+	///
+
+	// 设置纹理
+	void SetTexture(ID3D11ShaderResourceView* texture);
+
+	// 设置材质
+	void SetMaterial(Material material);
+
+
 	// 绘制
 	void Draw(ID3D11DeviceContext* deviceContext, IEffect* effect);
 
@@ -47,3 +74,9 @@ private:
 	DirectX::BoundingBox m_BoundingBox;
 };
 
+template<class VertexType, class IndexType>
+inline void GameObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData)
+{
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	modelComp->SetBuffer(device, meshData);
+}
