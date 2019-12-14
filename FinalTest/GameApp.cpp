@@ -62,33 +62,35 @@ void GameApp::UpdateScene(float dt)
 	auto lastMouseState = m_MouseTracker.GetLastState();
 	m_MouseTracker.Update(mouseState);
 
-	mouseState.x = mouseState.x - lastMouseState.x;
-	mouseState.y = mouseState.y - lastMouseState.y;
+	auto relaX  = mouseState.x - lastMouseState.x;
+	auto relaY = mouseState.y - lastMouseState.y;
 	
 
 
 	auto keyState = m_pKeyboard->GetState();
 	m_KeyboardTracker.Update(keyState);
 	
-	int w = mouseState.rightButton;
+	
+	bool w = keyState.IsKeyDown(Keyboard::LeftControl);
 
 	
 	ImGui::Begin("Editor");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 	ImGui::ColorEdit4("colorbg", (float*)&m_bg);
 	ImGui::Checkbox("PostProcess", & isPostProcess);
-	ImGui::DragInt("button", &w);
+	ImGui::Checkbox("button", &w);
 	//ImGui::SliderInt("textureIdx", &i, 0, 5);
 
 	ImGui::End();
 
 	static Mouse::State noOperation = {};
-	if (m_MouseTracker.rightButton == Mouse::ButtonStateTracker::HELD)
+	if (w)
 	{
 		m_pMouse->SetVisible(false);
 	}else
 	{
 		m_pMouse->SetVisible(true);	
-		mouseState = noOperation;
+		relaX = noOperation.x;
+		relaY = noOperation.y;
 	}
 	
 	// 获取子类
@@ -129,8 +131,10 @@ void GameApp::UpdateScene(float dt)
 		if (m_CameraMode == CameraMode::FirstPerson)
 			m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(adjustedPos.x, adjustedPos.y, adjustedPos.z));
 		// 视野旋转，防止开始的差值过大导致的突然旋转
-		cam1st->Pitch(mouseState.y * dt * 1.25f);
-		cam1st->RotateY(mouseState.x * dt * 1.25f);
+		cam1st->Pitch(relaY * dt * 1.25f);
+		cam1st->RotateY(relaX * dt * 1.25f);
+
+		
 	}
 	else if (m_CameraMode == CameraMode::ThirdPerson)
 	{
@@ -139,8 +143,8 @@ void GameApp::UpdateScene(float dt)
 		cam3rd->SetTarget(m_WoodCrate.GetPosition());
 
 		// 绕物体旋转
-		cam3rd->RotateX(mouseState.y * dt * 1.25f);
-		cam3rd->RotateY(mouseState.x * dt * 1.25f);
+		cam3rd->RotateX(relaY * dt * 1.25f);
+		cam3rd->RotateY(relaX * dt * 1.25f);
 		cam3rd->Approach(-mouseState.scrollWheelValue / 120 * 1.0f);
 	}
 
@@ -202,6 +206,16 @@ void GameApp::UpdateScene(float dt)
 		m_CameraMode = CameraMode::Free;
 	}
 	
+	// Pick
+	if (keyState.IsKeyDown(Keyboard::LeftAlt))
+	{
+		auto ray = Ray::ScreenToRay(*m_pCamera, (float)mouseState.x, (float)mouseState.y );
+		if (ray.Hit(m_WoodCrate.GetLocalBoundingBox()))
+		{
+			m_WoodCrate.isHit = true;
+		}
+	}
+
 	// 退出程序，这里应向窗口发送销毁信息
 	if (keyState.IsKeyDown(Keyboard::Escape))
 		SendMessage(MainWnd(), WM_DESTROY, 0, 0);
@@ -218,9 +232,6 @@ void GameApp::DrawScene()
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_bg);
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-
-	
-
 	if(isPostProcess)
 		m_pFullScreen->Begin(m_pd3dImmediateContext.Get());
 	// ********************
@@ -240,9 +251,11 @@ void GameApp::DrawScene()
 	BasicEffect::Get().SetRenderAlphaBlend(m_pd3dImmediateContext.Get());
 
 	// 篱笆盒稍微抬起一点高度
-	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(2.0f, 0.01f, 0.0f));
+	//m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(2.0f, 0.01f, 0.0f));
 	m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
+	if(m_WoodCrate.isHit)
 	{
+		m_WoodCrate.isHit = false;
 		WireEffect::Get().SetWireRender(m_pd3dImmediateContext.Get());
 		auto wire = Collision::CreateBoundingBox(m_WoodCrate.GetLocalBoundingBox(), XMFLOAT4(0.5, 0.1, 0.1, 1.0));
 
@@ -276,6 +289,9 @@ void GameApp::DrawScene()
 		HR(m_pd3dDevice->CreateBuffer(&ibd, &InitData, m_pIndexBuffer.GetAddressOf()));
 		// 输入装配阶段的索引缓冲区设置
 
+		D3D11SetDebugObjectName(m_pIndexBuffer.Get(), "index");
+		D3D11SetDebugObjectName(m_pVertexBuffer.Get(), "vertex");
+
 		UINT offset = 0;
 		m_pd3dImmediateContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &m_VertexStride, &offset);
 		m_pd3dImmediateContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
@@ -287,10 +303,10 @@ void GameApp::DrawScene()
 	}
 	
 
-	m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(-2.0f, 0.01f, 0.0f));
+	//m_WoodCrate.SetWorldMatrix(XMMatrixTranslation(-2.0f, 0.01f, 0.0f));
 	//m_WoodCrate.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
 	// 绘制了篱笆盒后再绘制水面
-	//m_Water.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
+	m_Water.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
 
 	if (isPostProcess)
 	{
@@ -339,27 +355,29 @@ bool GameApp::InitResource()
 	WireEffect::Get().SetProjMatrix(m_pCamera->GetProjXM());
 #pragma region 初始化游戏对象
 	// 
-	ComPtr<ID3D11ShaderResourceView> texture;
+	
 	Material material{};
 	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WireFence.dds", nullptr, texture.GetAddressOf()));
+	
+
+	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WireFence.dds", nullptr, texture.GetAddressOf()));
 	m_WoodCrate.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox<VertexPosNormalTex>());
-	m_WoodCrate.SetTexture(texture.Get());
+	m_WoodCrate.SetTexture(m_pd3dDevice.Get(), L"Texture\\WireFence.dds");
 	m_WoodCrate.SetMaterial(material);
 
 	// 初始化地板
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_Floor.SetBuffer(m_pd3dDevice.Get(),
 		Geometry::CreatePlane<VertexPosNormalTex>(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(20.0f, 20.0f), XMFLOAT2(5.0f, 5.0f)));
-	m_Floor.SetTexture(texture.Get());
+	m_Floor.SetTexture(m_pd3dDevice.Get(), L"Texture\\floor.dds");
 	m_Floor.SetMaterial(material);
 
 	// 初始化墙体
 	m_Walls.resize(4);
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\brick.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\brick.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	// 这里控制墙体四个面的生成
 	for (int i = 0; i < 4; ++i)
 	{
@@ -368,7 +386,7 @@ bool GameApp::InitResource()
 		XMMATRIX world = XMMatrixRotationX(-XM_PIDIV2) * XMMatrixRotationY(XM_PIDIV2 * i)
 			* XMMatrixTranslation(i % 2 ? -10.0f * (i - 2) : 0.0f, 3.0f, i % 2 == 0 ? -10.0f * (i - 1) : 0.0f);
 		m_Walls[i].SetWorldMatrix(world);
-		m_Walls[i].SetTexture(texture.Get());
+		m_Walls[i].SetTexture(m_pd3dDevice.Get(), L"Texture\\brick.dds");
 		m_Walls[i].SetMaterial(material);
 	}
 
@@ -376,10 +394,10 @@ bool GameApp::InitResource()
 	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
 	material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 32.0f);
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\water.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\water.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_Water.SetBuffer(m_pd3dDevice.Get(),
 		Geometry::CreatePlane(XMFLOAT3(), XMFLOAT2(20.0f, 20.0f), XMFLOAT2(10.0f, 10.0f)));
-	m_Water.SetTexture(texture.Get());
+	m_Water.SetTexture(m_pd3dDevice.Get(), L"Texture\\water.dds");
 	m_Water.SetMaterial(material);
 #pragma endregion
 

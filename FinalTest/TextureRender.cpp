@@ -101,7 +101,7 @@ TextureRender::~TextureRender()
 void TextureRender::Begin(ID3D11DeviceContext* deviceContext)
 {
 	// 缓存渲染目标和深度模板视图
-	deviceContext->OMGetRenderTargets(1, m_pCacheRTV.GetAddressOf(), m_pCacheDSV.GetAddressOf());
+	deviceContext->OMGetRenderTargets(1, m_pCacheRTV.ReleaseAndGetAddressOf(), m_pCacheDSV.ReleaseAndGetAddressOf());
 	// 缓存视口
 	UINT num_Viewports = 1;
 	deviceContext->RSGetViewports(&num_Viewports, &m_CacheViewPort);
@@ -141,4 +141,5 @@ ID3D11ShaderResourceView* TextureRender::GetOutputTexture()
 
 void TextureRender::SetDebugObjectName(const std::string& name)
 {
+	//D3D11SetDebugObjectName(m_.Get(), "BasicTextureComp");
 }

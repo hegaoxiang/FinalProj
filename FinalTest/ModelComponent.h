@@ -3,13 +3,15 @@
 #include"Geometry.h"
 
 
-
 class ModelComponent :
 	public Component
 {
 public:
-	ModelComponent() : m_IndexCount(), m_VertexStride() { XMStoreFloat4x4(&m_WorldMatrix, DirectX::XMMatrixIdentity()); }
+	ModelComponent() : m_IndexCount(), m_VertexStride() { 
+		XMStoreFloat4x4(&m_WorldMatrix, DirectX::XMMatrixIdentity()); 
+	}
 
+	DirectX::XMFLOAT4X4 GetWorldMatrix()const;
 	// 获取位置
 	DirectX::XMFLOAT3 GetPosition() const;
 
@@ -25,6 +27,9 @@ public:
 
 	// 得到索引数目
 	UINT GetIndexCount()const;
+
+	void Serialize() override;
+
 private:
 	DirectX::XMFLOAT4X4 m_WorldMatrix;                  // 世界矩阵
 
@@ -68,5 +73,8 @@ inline void ModelComponent::SetBuffer(ID3D11Device* device, const Geometry::Mesh
 	// 新建索引缓冲区
 	InitData.pSysMem = meshData.indexVec.data();
 	HR(device->CreateBuffer(&ibd, &InitData, m_pIndexBuffer.GetAddressOf()));
+
+	D3D11SetDebugObjectName(m_pVertexBuffer.Get(), "ModelConpVertexBuffer");
+	D3D11SetDebugObjectName(m_pIndexBuffer.Get(), "ModelConpIndexBuffer");
 
 }

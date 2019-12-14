@@ -2,10 +2,7 @@
 #include "BasicEffect.h"
 #include "PostEffect.h"
 
-emu
-{
 
-}
 GameObject::GameObject()
 {
 	Init();
@@ -13,16 +10,18 @@ GameObject::GameObject()
 
 void GameObject::Init()
 {
-	m_Components.insert(std::pair<ComponentID, ComponentPtr>("ModelComponent", new ModelComponent()));
-	m_Components["ModelComponent"]->SetRoot(this);
-	m_Components.insert(std::pair<ComponentID, ComponentPtr>("BasicTextureComponent", new BasicTextureComponent()));
-	m_Components["BasicTextureComponent"]->SetRoot(this);
+	m_Components.insert(std::pair<ComponentID, ComponentPtr>(IDModelComponent, new ModelComponent()));
+	m_Components[IDModelComponent]->SetRoot(this);
+	m_Components.insert(std::pair<ComponentID, ComponentPtr>(IDBasicTextureComponent, new BasicTextureComponent()));
+	m_Components[IDBasicTextureComponent]->SetRoot(this);
 }
 
-DirectX::BoundingBox GameObject::GetLocalBoundingBox() const
+DirectX::BoundingBox GameObject::GetLocalBoundingBox() 
 {
 	BoundingBox box;
-	//m_BoundingBox.Transform(box, XMLoadFloat4x4(&m_Components["ModelComponent"]));
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
+	
+	m_BoundingBox.Transform(box, XMLoadFloat4x4(&modelComp->GetWorldMatrix()));
 	return box;
 }
 
@@ -41,39 +40,45 @@ DirectX::BoundingOrientedBox GameObject::GetBoundingOrientedBox() const
 
 DirectX::XMFLOAT3 GameObject::GetPosition() 
 {
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
 	return modelComp->GetPosition();
 }
 
 void XM_CALLCONV GameObject::SetWorldMatrix(DirectX::FXMMATRIX world)
 {
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
 	modelComp->SetWorldMatrix(world);
 }
 
 void GameObject::SetWorldMatrix(const DirectX::XMFLOAT4X4& world)
 {
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
 	modelComp->SetWorldMatrix(world);
 }
 
 void GameObject::SetTexture(ID3D11ShaderResourceView* texture)
 {
-	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components["BasicTextureComponent"]);
+	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components[IDBasicTextureComponent]);
 	bcTexComp->SetTexture(texture);
 }
+void GameObject::SetTexture(ID3D11Device* device, const wchar_t* szfileName)
+{
+	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components[IDBasicTextureComponent]);
+	bcTexComp->SetTexture(device, szfileName);
+}
+
 
 void GameObject::SetMaterial(Material material)
 {
-	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components["BasicTextureComponent"]);
+	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components[IDBasicTextureComponent]);
 	bcTexComp->SetMaterial(material);
 }
 
 void GameObject::Draw(ID3D11DeviceContext* deviceContext, IEffect* effect)
 {
 	
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
-	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components["BasicTextureComponent"]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
+	auto bcTexComp = dynamic_cast<BasicTextureComponent*>(m_Components[IDBasicTextureComponent]);
 
 	if (modelComp == nullptr || bcTexComp == nullptr)
 		throw "one Component is not exit";

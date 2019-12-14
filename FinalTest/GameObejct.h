@@ -11,6 +11,13 @@ using namespace DirectX;
 
 class IEffect;
 
+enum MyEnum
+{
+	IDModelComponent,
+	IDBasicTextureComponent
+};
+
+
 class Component;
 using ComponentPtr = Component*;
 using ComponentID = unsigned short;
@@ -26,7 +33,7 @@ public:
 	// 获取包围盒
 	//
 
-	DirectX::BoundingBox GetLocalBoundingBox() const;
+	DirectX::BoundingBox GetLocalBoundingBox() ;
 	DirectX::BoundingBox GetBoundingBox() const;
 	DirectX::BoundingOrientedBox GetBoundingOrientedBox() const;
 
@@ -52,6 +59,7 @@ public:
 
 	// 设置纹理
 	void SetTexture(ID3D11ShaderResourceView* texture);
+	void SetTexture(ID3D11Device* device, const wchar_t* szfileName);
 
 	// 设置材质
 	void SetMaterial(Material material);
@@ -65,11 +73,11 @@ public:
 	void SetDebugObjectName(const std::string& name);
 
 	
+	bool isHit = false;
 private:
 	// 组件容器
 	ComponentMap m_Components;
  
-	
 
 	DirectX::BoundingBox m_BoundingBox;
 };
@@ -77,6 +85,6 @@ private:
 template<class VertexType, class IndexType>
 inline void GameObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData)
 {
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components["ModelComponent"]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
 	modelComp->SetBuffer(device, meshData);
 }

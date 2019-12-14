@@ -9,6 +9,8 @@ public:
 	// 设置纹理
 	void SetTexture(ID3D11ShaderResourceView* texture);
 	
+	void SetTexture(ID3D11Device* device, const wchar_t* szfileName);
+
 	// 设置材质
 	void SetMaterial(Material material);
 

@@ -21,8 +21,6 @@ public:
 	bool InitResource();
 	
 private:
-	ComPtr<ID3D11ShaderResourceView> m_pWoodCrate;
-	ComPtr<ID3D11ShaderResourceView> m_pTemp[6];
 
 	CameraMode m_CameraMode = CameraMode::FirstPerson;
 	std::shared_ptr<Camera> m_pCamera;

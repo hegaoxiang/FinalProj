@@ -1,6 +1,11 @@
 #include "ModelComponent.h"
 #include "BasicEffect.h"
 
+DirectX::XMFLOAT4X4 ModelComponent::GetWorldMatrix() const
+{
+	return m_WorldMatrix;
+}
+
 DirectX::XMFLOAT3 ModelComponent::GetPosition() const
 {
 	return DirectX::XMFLOAT3(m_WorldMatrix(3, 0), m_WorldMatrix(3, 1), m_WorldMatrix(3, 2));
@@ -28,11 +33,16 @@ void ModelComponent::ApplyToDraw(ID3D11DeviceContext* deviceContext, IEffect* ef
 	{
 		basicEffect->SetWorldMatrix(XMLoadFloat4x4(&m_WorldMatrix));
 	}
-
+	
 }
 
 UINT ModelComponent::GetIndexCount() const
 {
 	return m_IndexCount;
+}
+
+void ModelComponent::Serialize()
+{
+	throw std::logic_error("The method or operation is not implemented.");
 }
 
