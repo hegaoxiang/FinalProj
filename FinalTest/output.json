@@ -1,0 +1,19 @@
+{
+    "1": {
+        "transform": {
+            "position": {
+                "x": -10.0,
+                "y": 3.0,
+                "z": 0.0
+            }
+        },
+        "Mesh": {
+            "isOutside": false,
+            "VertexType": 0,
+            "Primitive": 0
+        }
+    },
+    "2": {
+        "BasicColorTexture": "Texture\\brick.dds"
+    }
+}

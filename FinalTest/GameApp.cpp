@@ -5,6 +5,12 @@
 #include "PostEffect.h"
 #include "WireEffect.h"
 #include "Collision.h"
+// serialize
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/document.h>
+using namespace rapidjson;
+
 using namespace DirectX;
 
 
@@ -367,6 +373,7 @@ bool GameApp::InitResource()
 	m_WoodCrate.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox<VertexPosNormalTex>());
 	m_WoodCrate.SetTexture(m_pd3dDevice.Get(), L"Texture\\WireFence.dds");
 	m_WoodCrate.SetMaterial(material);
+	
 
 	// 初始化地板
 	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.dds", nullptr, texture.ReleaseAndGetAddressOf()));
@@ -375,12 +382,18 @@ bool GameApp::InitResource()
 	m_Floor.SetTexture(m_pd3dDevice.Get(), L"Texture\\floor.dds");
 	m_Floor.SetMaterial(material);
 
+	// test
+
 	// 初始化墙体
 	m_Walls.resize(4);
 	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\brick.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	// 这里控制墙体四个面的生成
 	for (int i = 0; i < 4; ++i)
 	{
+		
+		
+		StringBuffer s;
+		PrettyWriter<StringBuffer> write(s);
 		m_Walls[i].SetBuffer(m_pd3dDevice.Get(),
 			Geometry::CreatePlane<VertexPosNormalTex>(XMFLOAT3(), XMFLOAT2(20.0f, 8.0f), XMFLOAT2(5.0f, 1.5f)));
 		XMMATRIX world = XMMatrixRotationX(-XM_PIDIV2) * XMMatrixRotationY(XM_PIDIV2 * i)
@@ -388,7 +401,22 @@ bool GameApp::InitResource()
 		m_Walls[i].SetWorldMatrix(world);
 		m_Walls[i].SetTexture(m_pd3dDevice.Get(), L"Texture\\brick.dds");
 		m_Walls[i].SetMaterial(material);
+		m_Walls[i].Serialize(write);
+
+		Document d;
+		d.Parse(s.GetString());
+
+		FILE* fp;
+		fopen_s(&fp, "output.json", "wb");
+
+		char writeBuffer[65536];
+		FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+		PrettyWriter<FileWriteStream> writer(os);
+		d.Accept(writer);
+		fclose(fp);
 	}
+	
 
 	// 初始化水
 	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);

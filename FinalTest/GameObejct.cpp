@@ -1,7 +1,8 @@
 #include "GameObejct.h"
 #include "BasicEffect.h"
 #include "PostEffect.h"
-
+#include <string>
+using namespace std;
 
 GameObject::GameObject()
 {
@@ -96,4 +97,16 @@ void GameObject::SetDebugObjectName(const std::string& name)
 {
 	//D3D11SetDebugObjectName(m_pVertexBuffer.Get(), "VertexBuffer");
 	//D3D11SetDebugObjectName(m_pIndexBuffer.Get(), "IndexBuffer");
+}
+
+void GameObject::Serialize(PrettyWriter<StringBuffer>& write)
+{
+	write.StartObject();
+
+	for (auto& item : m_Components)
+	{
+		write.Key(to_string(item.second->GetId()).c_str());
+		item.second->Serialize(write);
+	}
+	write.EndObject();
 }

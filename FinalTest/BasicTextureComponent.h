@@ -5,7 +5,7 @@ class BasicTextureComponent
 	:public Component
 {
 public:
-	BasicTextureComponent() {};
+	BasicTextureComponent() : m_textureColor("") { SetId(); };
 	// 设置纹理
 	void SetTexture(ID3D11ShaderResourceView* texture);
 	
@@ -15,9 +15,20 @@ public:
 	void SetMaterial(Material material);
 
 	void ApplyToDraw(ID3D11DeviceContext* deviceContext, IEffect* effect) const override;
+
+	void Serialize(PrettyWriter<StringBuffer>& write) override;
+
+
+	ComponentID GetId() override;
+
 private:
+	void SetId() override;
+
 	Material m_Material;								// 材质
 	
 	ComPtr<ID3D11ShaderResourceView> m_pTexture;        // 纹理
+
+	// serialize
+	std::string m_textureColor;
 };
 

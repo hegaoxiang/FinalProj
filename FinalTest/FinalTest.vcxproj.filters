@@ -31,6 +31,15 @@
     <Filter Include="Actor">
       <UniqueIdentifier>{82dcd6b5-954d-43f6-b067-31eaa5432e2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3rdParty">
+      <UniqueIdentifier>{767e1620-1df0-4d90-b03b-7c46f9671d59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\rapidjson">
+      <UniqueIdentifier>{396898a0-93c9-4407-b678-b2214f6aa3b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{5a57e16c-e487-4426-ae75-2295d238524a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IMGui\imconfig.h">
@@ -129,6 +138,9 @@
     <ClInclude Include="BasicTextureComponent.h">
       <Filter>Actor</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalTest.cpp">
@@ -220,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="BasicTextureComponent.cpp">
       <Filter>Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

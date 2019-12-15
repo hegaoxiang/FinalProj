@@ -1,12 +1,13 @@
 #pragma once
 
 #include<DirectXMath.h>
-
 #include <DirectXCollision.h>
 #include "ModelComponent.h"
 #include "BasicTextureComponent.h"
 #include <map>
 #include <string>
+#include <rapidjson/prettywriter.h>
+using namespace rapidjson;
 using namespace DirectX;
 
 class IEffect;
@@ -74,10 +75,16 @@ public:
 
 	
 	bool isHit = false;
+
+	///
+	/// serialize
+	///
+	void Serialize(PrettyWriter<StringBuffer>& write);
+
+	///
 private:
 	// ×é¼þÈÝÆ÷
 	ComponentMap m_Components;
- 
 
 	DirectX::BoundingBox m_BoundingBox;
 };

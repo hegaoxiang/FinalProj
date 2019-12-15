@@ -7,8 +7,9 @@ class ModelComponent :
 	public Component
 {
 public:
-	ModelComponent() : m_IndexCount(), m_VertexStride() { 
+	ModelComponent() : m_isOutside(false), m_IndexCount(), m_VertexStride(),m_Position() {
 		XMStoreFloat4x4(&m_WorldMatrix, DirectX::XMMatrixIdentity()); 
+		SetId();
 	}
 
 	DirectX::XMFLOAT4X4 GetWorldMatrix()const;
@@ -28,21 +29,36 @@ public:
 	// 得到索引数目
 	UINT GetIndexCount()const;
 
-	void Serialize() override;
+	// serialize
+	void Serialize(PrettyWriter<StringBuffer>& write) override;
+	void SetBufferAttr(int vertexType,int primitive);
+
+
+
+	ComponentID GetId() override;
 
 private:
+	void SetId() override;
+
 	DirectX::XMFLOAT4X4 m_WorldMatrix;                  // 世界矩阵
 
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;               // 顶点缓冲区
 	ComPtr<ID3D11Buffer> m_pIndexBuffer;                // 索引缓冲区
 	UINT m_VertexStride;                                // 顶点字节大小
 	UINT m_IndexCount;                                  // 索引数目
-
+	
+	// serialize
+	bool m_isOutside;
+	DirectX::XMFLOAT3 m_Position;
+	int m_Vertextype;
+	int m_Primitive;
 };
 
 template<class VertexType, class IndexType>
 inline void ModelComponent::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData)
 {
+	m_isOutside = false;
+
 	// 释放旧资源
 	m_pVertexBuffer.Reset();
 	m_pIndexBuffer.Reset();

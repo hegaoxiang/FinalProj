@@ -54,6 +54,29 @@ struct VertexPosTex
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[2];
 };
 
+struct VertexPosNormalTex 
+{
+	//const static int type = 2;
+
+
+	VertexPosNormalTex() = default;
+
+	VertexPosNormalTex(const VertexPosNormalTex&) = default;
+	VertexPosNormalTex& operator=(const VertexPosNormalTex&) = default;
+
+	VertexPosNormalTex(VertexPosNormalTex&&) = default;
+	VertexPosNormalTex& operator=(VertexPosNormalTex&&) = default;
+
+	constexpr VertexPosNormalTex(const DirectX::XMFLOAT3& _pos, const DirectX::XMFLOAT3& _normal,
+		const DirectX::XMFLOAT2& _tex) :
+		pos(_pos), normal(_normal), tex(_tex) {}
+
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT2 tex;
+	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
+};
+
 struct VertexPosSize
 {
 	VertexPosSize() = default;
@@ -92,37 +115,6 @@ struct VertexPosNormalColor
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
 };
 
-// 物体表面材质
-struct Material
-{
-	Material() { memset(this, 0, sizeof(Material)); }
-
-	DirectX::XMFLOAT4 ambient;
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 specular; // w = 镜面反射强度
-	DirectX::XMFLOAT4 reflect;
-};
-
-struct VertexPosNormalTex
-{
-	VertexPosNormalTex() = default;
-
-	VertexPosNormalTex(const VertexPosNormalTex&) = default;
-	VertexPosNormalTex& operator=(const VertexPosNormalTex&) = default;
-
-	VertexPosNormalTex(VertexPosNormalTex&&) = default;
-	VertexPosNormalTex& operator=(VertexPosNormalTex&&) = default;
-
-	constexpr VertexPosNormalTex(const DirectX::XMFLOAT3& _pos, const DirectX::XMFLOAT3& _normal,
-		const DirectX::XMFLOAT2& _tex) :
-		pos(_pos), normal(_normal), tex(_tex) {}
-
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 normal;
-	DirectX::XMFLOAT2 tex;
-	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
-};
-
 struct VertexPosNormalTangentTex
 {
 	VertexPosNormalTangentTex() = default;
@@ -142,6 +134,18 @@ struct VertexPosNormalTangentTex
 	DirectX::XMFLOAT4 tangent;
 	DirectX::XMFLOAT2 tex;
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
+};
+
+
+// 物体表面材质
+struct Material
+{
+	Material() { memset(this, 0, sizeof(Material)); }
+
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 specular; // w = 镜面反射强度
+	DirectX::XMFLOAT4 reflect;
 };
 
 

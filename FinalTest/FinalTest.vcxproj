@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\12976\source\repos\FinalTest\FinalTest\3rdParty;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -181,6 +182,7 @@
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="PostEffect.h" />
     <ClInclude Include="RenderStates.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="TextureRender.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="WICTextureLoader.h" />
@@ -213,6 +215,7 @@
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PostEffect.cpp" />
     <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="TextureRender.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
