@@ -5,6 +5,7 @@
 #include "GameObejct.h"
 #include "RenderStates.h"
 #include "TextureRender.h"
+#include "Scene.h"
 
 class GameApp : public D3DApp
 {
@@ -26,8 +27,8 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 	
 	GameObject m_WoodCrate;
-	GameObject m_Floor;
-	std::vector<GameObject> m_Walls;
+	
+	Scene m_staticScene;
 	GameObject m_Water;
 	GameObject m_Post;
 

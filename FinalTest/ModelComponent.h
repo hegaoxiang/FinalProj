@@ -19,6 +19,7 @@ public:
 	// 设置位置矩阵
 	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX world);
 	void SetWorldMatrix(const DirectX::XMFLOAT4X4& world);
+	void SetPosition(const DirectX::XMFLOAT3& position);
 
 	// 设置缓冲区
 	template<class VertexType, class IndexType>
@@ -29,13 +30,15 @@ public:
 	// 得到索引数目
 	UINT GetIndexCount()const;
 
+	ComponentID GetId() override;
+	
 	// serialize
 	void Serialize(PrettyWriter<StringBuffer>& write) override;
-	void SetBufferAttr(int vertexType,int primitive);
+	
+	void SetBufferAttr(int vertexType,int primitive,std::initializer_list<float>details);
 
 
-
-	ComponentID GetId() override;
+	void AntiSerialize(const char* pData) override;
 
 private:
 	void SetId() override;
@@ -48,10 +51,13 @@ private:
 	UINT m_IndexCount;                                  // 索引数目
 	
 	// serialize
-	bool m_isOutside;
 	DirectX::XMFLOAT3 m_Position;
+	bool m_isOutside;
+
 	int m_Vertextype;
 	int m_Primitive;
+	
+	std::vector<float> m_MeshAttrs;
 };
 
 template<class VertexType, class IndexType>

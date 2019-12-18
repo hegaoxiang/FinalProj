@@ -5,6 +5,7 @@
 #include "PostEffect.h"
 #include "WireEffect.h"
 #include "Collision.h"
+#include <iostream>
 // serialize
 #include <rapidjson/filewritestream.h>
 #include <rapidjson/prettywriter.h>
@@ -13,7 +14,7 @@ using namespace rapidjson;
 
 using namespace DirectX;
 
-
+ID3D11Device* g_device;
 GameApp::GameApp(HINSTANCE hInstance)
 	: D3DApp(hInstance)
 {
@@ -33,6 +34,7 @@ bool GameApp::Init()
 
 	if (!D3DApp::Init())
 		return false;
+	g_device = m_pd3dDevice.Get();
 	if (!InitShader())
 		return false;
 	if (!InitResource())
@@ -245,10 +247,9 @@ void GameApp::DrawScene()
 	//
 	BasicEffect::Get().SetRenderDefault(m_pd3dImmediateContext.Get());
 
-
-	for (auto& wall : m_Walls)
-		wall.Draw(m_pd3dImmediateContext.Get(),&BasicEffect::Get());
-	m_Floor.Draw(m_pd3dImmediateContext.Get(), &BasicEffect::Get());
+	
+	for (auto& item : m_staticScene.GetObjects())
+		item->Draw(m_pd3dImmediateContext.Get(),&BasicEffect::Get());
 
 	// ********************
 	// 2. 绘制透明对象
@@ -369,56 +370,77 @@ bool GameApp::InitResource()
 
 	
 
+	m_WoodCrate.Init();
 	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WireFence.dds", nullptr, texture.GetAddressOf()));
 	m_WoodCrate.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox<VertexPosNormalTex>());
 	m_WoodCrate.SetTexture(m_pd3dDevice.Get(), L"Texture\\WireFence.dds");
 	m_WoodCrate.SetMaterial(material);
+	#if 0
 	
-
+	GameObject* floor = new GameObject();
 	// 初始化地板
+	floor->Init();
 	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.dds", nullptr, texture.ReleaseAndGetAddressOf()));
-	m_Floor.SetBuffer(m_pd3dDevice.Get(),
+	floor->SetBuffer(m_pd3dDevice.Get(),
 		Geometry::CreatePlane<VertexPosNormalTex>(XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(20.0f, 20.0f), XMFLOAT2(5.0f, 5.0f)));
-	m_Floor.SetTexture(m_pd3dDevice.Get(), L"Texture\\floor.dds");
-	m_Floor.SetMaterial(material);
-
+	floor->SetBufferAttr(1, 1, { 0, -1, 0, 20, 20, 5, 5 });
+	floor->SetTexture(m_pd3dDevice.Get(), L"Texture\\floor.dds");
+	floor->SetMaterial(material);
+	floor->SetName("floor");
+	m_staticScene.AddStaticObject(StrongGameObjectPtr(floor));
 	// test
 
+	std::vector<GameObject*> walls;
 	// 初始化墙体
-	m_Walls.resize(4);
+	walls.resize(4);
 	//HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\brick.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	// 这里控制墙体四个面的生成
 	for (int i = 0; i < 4; ++i)
-	{
-		
-		
-		StringBuffer s;
-		PrettyWriter<StringBuffer> write(s);
-		m_Walls[i].SetBuffer(m_pd3dDevice.Get(),
+	{		
+		walls[i] = new GameObject();
+		walls[i]->Init();
+		walls[i]->SetBuffer(m_pd3dDevice.Get(),
 			Geometry::CreatePlane<VertexPosNormalTex>(XMFLOAT3(), XMFLOAT2(20.0f, 8.0f), XMFLOAT2(5.0f, 1.5f)));
+		walls[i]->SetBufferAttr(1, 1, { 0,0,0,20,8,5,1.5 });
 		XMMATRIX world = XMMatrixRotationX(-XM_PIDIV2) * XMMatrixRotationY(XM_PIDIV2 * i)
 			* XMMatrixTranslation(i % 2 ? -10.0f * (i - 2) : 0.0f, 3.0f, i % 2 == 0 ? -10.0f * (i - 1) : 0.0f);
-		m_Walls[i].SetWorldMatrix(world);
-		m_Walls[i].SetTexture(m_pd3dDevice.Get(), L"Texture\\brick.dds");
-		m_Walls[i].SetMaterial(material);
-		m_Walls[i].Serialize(write);
-
-		Document d;
-		d.Parse(s.GetString());
-
-		FILE* fp;
-		fopen_s(&fp, "output.json", "wb");
-
-		char writeBuffer[65536];
-		FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-
-		PrettyWriter<FileWriteStream> writer(os);
-		d.Accept(writer);
-		fclose(fp);
-	}
+		walls[i]->SetWorldMatrix(world);
+		walls[i]->SetTexture(m_pd3dDevice.Get(), L"Texture\\brick.dds");
+		walls[i]->SetMaterial(material);
+		walls[i]->SetName("wall");
 	
 
+		m_staticScene.AddStaticObject(StrongGameObjectPtr(walls[i]));		
+	}
+	
+	if (true)
+{
+	StringBuffer s;
+		PrettyWriter<StringBuffer> write(s);
+		m_staticScene.Serialize(write);
+		auto a =std::string(s.GetString());
+		Document d;
+		assert(kParseErrorNone == d.Parse(s.GetString()).HasParseError());
+	
+		FILE* fp;
+		fopen_s(&fp, "staticScene.json", "wb");
+		assert(fp != nullptr);
+	
+		char *writeBuffer = new char[65536];
+		FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+			
+		PrettyWriter<FileWriteStream> fileWriter(os);
+		d.Accept(fileWriter);
+		
+		delete[] writeBuffer;
+		fclose(fp);
+}
+#endif
+
+	m_staticScene.AntiSerialize("staticScene.json");
+	
 	// 初始化水
+	m_Water.Init();
 	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
 	material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 32.0f);
@@ -458,7 +480,7 @@ bool GameApp::InitResource()
 	m_SpotLight.range = 10000.0f;
 
 #pragma endregion
-
+	m_Post.Init();
 	m_Post.SetBuffer(m_pd3dDevice.Get(), Geometry::Create2DShow());
 	for (int i = 0; i < 10; i++)
 	{

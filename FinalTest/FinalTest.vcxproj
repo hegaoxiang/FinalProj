@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActorFactory.h" />
     <ClInclude Include="BasicEffect.h" />
     <ClInclude Include="BasicTextureComponent.h" />
     <ClInclude Include="Camera.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="WireEffect.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ActorFactory.cpp" />
     <ClCompile Include="BasicEffect.cpp" />
     <ClCompile Include="BasicTextureComponent.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -226,6 +228,7 @@
     <None Include="HLSL\LightHelper.hlsli" />
     <None Include="HLSL\Post.hlsli" />
     <None Include="HLSL\Triangle.hlsli" />
+    <None Include="staticScene.json" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\LightPS.hlsl">

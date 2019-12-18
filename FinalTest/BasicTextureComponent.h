@@ -10,6 +10,7 @@ public:
 	void SetTexture(ID3D11ShaderResourceView* texture);
 	
 	void SetTexture(ID3D11Device* device, const wchar_t* szfileName);
+	void SetTexture(ID3D11Device* device, const std::string& fileName);
 
 	// …Ë÷√≤ƒ÷ 
 	void SetMaterial(Material material);
@@ -20,6 +21,9 @@ public:
 
 
 	ComponentID GetId() override;
+
+
+	void AntiSerialize(const char* pData) override;
 
 private:
 	void SetId() override;

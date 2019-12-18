@@ -141,6 +141,9 @@
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ActorFactory.h">
+      <Filter>Actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalTest.cpp">
@@ -236,6 +239,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="ActorFactory.cpp">
+      <Filter>Actor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Triangle.hlsli">
@@ -249,6 +255,9 @@
     </None>
     <None Include="HLSL\WireFrame.hlsli">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="staticScene.json">
+      <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

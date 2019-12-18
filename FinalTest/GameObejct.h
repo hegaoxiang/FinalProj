@@ -5,6 +5,7 @@
 #include "ModelComponent.h"
 #include "BasicTextureComponent.h"
 #include <map>
+#include <memory>
 #include <string>
 #include <rapidjson/prettywriter.h>
 using namespace rapidjson;
@@ -20,15 +21,19 @@ enum MyEnum
 
 
 class Component;
-using ComponentPtr = Component*;
+using StrongCompnentPtr = std::shared_ptr<Component>;
 using ComponentID = unsigned short;
-typedef  std::map<ComponentID, ComponentPtr > ComponentMap;
+using ActorId = unsigned short;
+using StrongGameObjectPtr = std::shared_ptr<GameObject>;
+typedef  std::map<ComponentID, StrongCompnentPtr > ComponentMap;
+
 
 class GameObject
 {
 public:
 	GameObject();
-	
+
+	void SetId(int id) { m_id = id; }
 	void Init();
 	//
 	// 获取包围盒
@@ -65,7 +70,7 @@ public:
 	// 设置材质
 	void SetMaterial(Material material);
 
-
+	void SetName(const std::string& str) { m_name = str; }
 	// 绘制
 	void Draw(ID3D11DeviceContext* deviceContext, IEffect* effect);
 
@@ -80,9 +85,13 @@ public:
 	/// serialize
 	///
 	void Serialize(PrettyWriter<StringBuffer>& write);
+	void SetBufferAttr(int vertexType, int primitive, std::initializer_list<float>details);
 
+	void AddCompent(Component* pComp);
 	///
 private:
+	ActorId m_id;
+	std::string m_name;
 	// 组件容器
 	ComponentMap m_Components;
 
@@ -92,6 +101,6 @@ private:
 template<class VertexType, class IndexType>
 inline void GameObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData)
 {
-	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent]);
+	auto modelComp = dynamic_cast<ModelComponent*>(m_Components[IDModelComponent].get());
 	modelComp->SetBuffer(device, meshData);
 }

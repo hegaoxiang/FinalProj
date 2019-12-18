@@ -3,25 +3,30 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "Actor.h"
-using ActorComponentCreator = ActorComponent*(*)();
-using ActorComponentCreatorMap = std::map<std::string, ActorComponentCreator>;
+#include "GameObejct.h"
 
-using StrongActorPtr = std::shared_ptr<Actor>;
-using StrongActorComponentPtr = std::shared_ptr<ActorComponent>;
+using ComponentCreator = Component*(*)();
+using Tag = UINT;
+using ActorComponentCreatorMap = std::map<Tag, ComponentCreator>;
 
-class ActorFactory
+using StrongActorPtr = std::shared_ptr<GameObject>;
+
+
+class  ActorFactory
 {
+	
 	ActorId	m_lastActorId;
 protected:
-	ActorComponentCreatorMap m_actorComponentCreators;
+	ActorComponentCreatorMap m_ComponentCreator;
 public:
 	ActorFactory();
-	StrongActorPtr CreateActor(const char* actorResource);
+	ActorFactory& GetActorFactory() ;
+	StrongActorPtr CreateActor(const char* actorInfo);
 protected:
-	virtual StrongActorComponentPtr CreateComponent(const char* pData);
+	Component* CreateComponent(const char* pData);
 
 private:
 	ActorId GetNextActorId() { ++m_lastActorId; return m_lastActorId; }
 };
+static ActorFactory g_ActorFactoryIns;
 

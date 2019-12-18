@@ -81,7 +81,6 @@ namespace Geometry
 		//
 		// 以下结构体和函数仅供内部实现使用
 		//
-
 		struct VertexData
 		{
 			DirectX::XMFLOAT3 pos;
